@@ -1,13 +1,23 @@
 const nodemailer = require('nodemailer');
-const { EMAIL, CLIENT_URL } = require('../config/config');
+const config = require("../config/config");
+const logger = require('../config/logger');
+const transport = nodemailer.createTransport(config.email.smtp);
 
-const transport = nodemailer.createTransport(EMAIL.smtp);
-// const transport = nodemailer.createTransport(config.smtp);
-
-transport
+if (config.env !== "test") {
+  transport
     .verify()
-    .then(() => console.log('Connect to email server'))
-    .catch((err) => (console.log('Unable to connect to email server. Make sure you have configured the SMTP options in .env')))
+    .then(() => logger.info("Connected to email server"))
+    .catch(() =>
+      logger.warn(
+        "Unable to connect to email server. Make sure you have configured the SMTP options in .env"
+      )
+    );
+}
+
+// transport
+//     .verify()
+//     .then(() => console.log('Connect to email server'))
+//     .catch((err) => (console.log('Unable to connect to email server. Make sure you have configured the SMTP options in .env')))
 
 /**
  * @description Send an email
@@ -33,12 +43,12 @@ const sendMail = async (from, to, subject, text) => {
 const sendForgetPassword = async (token, userData) => {
     const { email, firstName, lastName } = userData
     const subject = "Reset password link";
-    const forgetPasswordUrl = `${CLIENT_URL}/user/resetPasswort?token=${token}&email=${email}`;
+    const forgetPasswordUrl = `${config.client_url}/user/resetPasswort?token=${token}&email=${email}`;
     // const changeName = await capitalizedFirstLetter(firstName, lastName);
     const changeName = `${firstName} ${lastName}`
     const text = `<p>Dear ${changeName},
     We received a request for a password change on your Goaly.ly account. You can reset your password</p><a href="${forgetPasswordUrl}">here</a>. your new password.`;
-    await sendMail(EMAIL.from, email, subject, text)
+    await sendMail(config.email.from, email, subject, text)
 }
 
 module.exports = {

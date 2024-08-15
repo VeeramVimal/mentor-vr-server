@@ -13,7 +13,7 @@ const { tokenTypes } = require("../config/token");
  * @param {string} [secret]
  * @returns {string}
  */
-const generatetoken = async (userId, email, firstName, lastName, roleName,  type, expires, secret = config.JWT.SECRET) => {
+const generatetoken = async (userId, email, firstName, lastName, roleName,  type, expires, secret = config.jwt.secret) => {
  const payload = {
     users: {
         _id: userId,
@@ -30,7 +30,7 @@ const generatetoken = async (userId, email, firstName, lastName, roleName,  type
  return jwt.sign(payload, secret)
 }
 
-const generateResetToken = async( email, type, expires, secret = config.JWT.SECRET) => {
+const generateResetToken = async( email, type, expires, secret = config.jwt.secret) => {
     const payload = {
        sub: email,
        iat: moment().unix(),
@@ -47,9 +47,9 @@ const generateResetToken = async( email, type, expires, secret = config.JWT.SECR
  */
 const generateAuthToken = async (user) => {
     const { _id, email, firstName, lastName, roleName} = user
-    const accessTokenExpires = moment().add(config.JWT.ACCESS_EXPIRATION_MINUTES, 'minutes');
+    const accessTokenExpires = moment().add(config.jwt.accessExpirationMinutes, 'minutes');
     const accessToken = await generatetoken(_id, email, firstName, lastName, roleName, tokenTypes.ACCESS, accessTokenExpires);
-    // const refreshTokenExpires = moment().add(config.JWT.REFRESH_EXPIRATION_DAYS, 'days');
+    // const refreshTokenExpires = moment().add(config.jwt.refreshExpirationDays, 'days');
     // const refreshToken = await generatetoken(_id, email, tokenTypes.REFERSH, refreshTokenExpires);
     return {
         access: {
@@ -61,7 +61,7 @@ const generateAuthToken = async (user) => {
 
 const generateResetPasswordToken = async(userBody) => {
     const {email} = userBody
-    const expires = moment().add(config.JWT.ACCESS_EXPIRATION_MINUTES, 'minutes');
+    const expires = moment().add(config.jwt.accessExpirationMinutes, 'minutes');
     const resetPasswordToken = await generateResetToken(email, tokenTypes.RESET_PASSWORD, expires);
     return resetPasswordToken
 }
